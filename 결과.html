@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>직선 전류에 의한 자기장</title>
+
+    <style>
+        body {
+            background-color: antiquewhite;
+        }
+
+        * {
+            margin: 0;
+        }
+
+        h3,
+        p {
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+
+        .wire {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            width: 50px;
+            height: 50px;
+            background-color: chocolate;
+            border-radius: 50%;
+
+            cursor: pointer;
+        }
+
+        .nachimpan {
+
+            position: absolute;
+            top: 150px;
+            left: 30px;
+
+            width: 100px;
+            height: 100px;
+
+            background-color: white;
+
+            border-radius: 50%;
+            border: 6px solid gray;
+
+
+        }
+
+        .chim {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 10px;
+            background: linear-gradient(to right, red 50%, blue 50%);
+        }
+
+        .wire span {
+            background-color: brown;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        #mode:checked+label.wire span {
+            width: 18px;
+            height: 3px;
+            border-radius: 0;
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        #mode:checked+label.wire span:first-child {
+            width: 3px;
+            height: 18px;
+        }
+    </style>
+
+    <script>
+
+        function dragElement(elmnt) {
+            var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            if (document.getElementById(elmnt.id)) {
+                document.getElementById(elmnt.id).onmousedown = dragMouseDown;
+            } else {
+                elmnt.onmousedown = dragMouseDown;
+            }
+            reload();
+
+            document.querySelector("#mode").addEventListener("click", reload);
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                elmnt.style.top = Math.max(0, elmnt.offsetTop - pos2) + "px";
+                elmnt.style.left = Math.max(0, elmnt.offsetLeft - pos1) + "px";
+
+                reload()
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+
+            function reload() {
+
+                const wire = document.querySelector("#wire");
+                const nachimpan = document.querySelector("#nachimpan");
+                const chim = document.querySelector("#chim");
+
+                const wireRect = wire.getBoundingClientRect();
+
+                const wireCenter = [
+                    Math.floor(wireRect.top + wire.clientWidth / 2),
+                    Math.floor(wireRect.left + wire.clientHeight / 2)
+                ];
+
+                const nachimpanRect = nachimpan.getBoundingClientRect();
+
+                const nachimpanCenter = [
+                    Math.floor(nachimpanRect.top + nachimpan.clientWidth / 2),
+                    Math.floor(nachimpanRect.left + nachimpan.clientHeight / 2)
+                ];
+
+                const giugiX = wireCenter[0] - nachimpanCenter[0];
+                const giugiY = wireCenter[1] - nachimpanCenter[1];
+                const giugi = -giugiX / giugiY;
+                let deg = Math.atan(giugi) * (180 / Math.PI) * -1 + 90;
+
+                chim.style.transform = "translate(-50%, -50%) rotate(" + deg + "deg)";
+
+                if (document.querySelector("#mode").checked) { //들어가는 방향
+                    chim.style.background = "linear-gradient(to "
+                        + ((giugiY >= 0) ? "right" : "left")
+                        + ", red 50%, blue 50%)";
+                } else { //나오는 방향
+                    chim.style.background = "linear-gradient(to "
+                        + ((giugiY >= 0) ? "left" : "right")
+                        + ", red 50%, blue 50%)";
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+    <h3>직선 전류에 의한 자기장 방향을 알아보자</h3>
+    <p>도선을 눌러 자기장 방향을 변경하세요. (o: 나오는 방향, x: 들어가는 방향)</p>
+    <p>나침반을 움직여 자기장의 방향을 알아보세요</p>
+    <p>만든사람: 김준아</p>
+
+    <input id="mode" type="checkbox" hidden />
+    <label class="wire in" id="wire" for="mode">
+        <span></span>
+        <span></span>
+    </label>
+
+    <div class="nachimpan" id="nachimpan">
+        <span class="chim" id="chim"></span>
+    </div>
+
+    <script>
+        dragElement(document.getElementById("nachimpan"));
+    </script>
+
+</body>
+
+</html>
